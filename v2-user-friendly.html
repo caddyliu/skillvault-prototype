@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的助手 - SkillVault v2</title>
+    <style>
+        :root {
+            --bg-primary: #f8f9fa;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f1f3f5;
+            --text-primary: #212529;
+            --text-secondary: #6c757d;
+            --text-muted: #868e96;
+            --border-color: #dee2e6;
+            --accent-color: #5c7cfa;
+            --accent-hover: #4c6ef5;
+            --success-color: #40c057;
+            --warning-color: #fcc419;
+            --danger-color: #fa5252;
+            --border-radius: 16px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--bg-secondary), var(--bg-primary));
+            border-radius: 24px;
+            padding: 40px 32px;
+            margin-bottom: 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(92, 124, 250, 0.1);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo-circle {
+            width: 64px;
+            height: 64px;
+            background: var(--accent-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            box-shadow: 0 4px 16px rgba(92, 124, 250, 0.3);
+        }
+
+        .header-title h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: var(--text-primary);
+        }
+
+        .header-subtitle {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .theme-toggle {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--accent-color);
+        }
+
+        /* Banner */
+        .banner {
+            background: linear-gradient(135deg, var(--accent-color), #a855f7);
+            border-radius: 24px;
+            padding: 32px;
+            color: #fff;
+            margin-bottom: 32px;
+            box-shadow: 0 8px 32px rgba(92, 124, 250, 0.2);
+        }
+
+        .banner-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .banner-count {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            opacity: 0.9;
+        }
+
+        .banner-features {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255,255,255,0.2);
+            padding: 12px 20px;
+            border-radius: 16px;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Main Content */
+        .main-content {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 24px;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+        }
+
+        .search-box {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .search-box input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 14px;
+            background: transparent;
+        }
+
+        .skill-list {
+            background: var(--bg-secondary);
+            border-radius: 24px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        .skill-item {
+            padding: 20px;
+            margin-bottom: 12px;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+            background: var(--bg-secondary);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .skill-item:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .skill-item.active {
+            border-color: var(--accent-color);
+            background: #f0f4ff;
+        }
+
+        .skill-icon {
+            width: 52px;
+            height: 52px;
+            background: linear-gradient(135deg, #e0e7ff, #8b9bb4);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            flex-shrink: 0;
+        }
+
+        .skill-item.active .skill-icon {
+            background: linear-gradient(135deg, #e0e7ff, #5c7cfa);
+        }
+
+        .skill-info {
+            flex: 1;
+        }
+
+        .skill-name {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .skill-meta {
+            font-size: 12px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .skill-status {
+            padding: 4px 10px;
+            border-radius: 14px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-approved {
+            background: #d1e7dd;
+            color: #0f5132;
+        }
+
+        .skill-category {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        /* Main Panel */
+        .main-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* Skill Detail */
+        .skill-detail {
+            background: var(--bg-secondary);
+            border-radius: 24px;
+            padding: 32px;
+            border: 1px solid var(--border-color);
+        }
+
+        .skill-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 24px;
+        }
+
+        .skill-title-section {
+            flex: 1;
+        }
+
+        .skill-breadcrumb {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .skill-breadcrumb span {
+            margin: 0 6px;
+            color: var(--text-muted);
+        }
+
+        .skill-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+            line-height: 1.3;
+        }
+
+        .skill-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .action-btn {
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: var(--accent-color);
+            color: #fff;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border-color);
+        }
+
+        /* One-Liner */
+        .one-liner {
+            background: linear-gradient(135deg, #fff0ff, #e0f2fe);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 24px;
+            border: 1px solid #fbcfe8;
+        }
+
+        .one-liner-icon {
+            font-size: 20px;
+            margin-bottom: 8px;
+        }
+
+        .one-liner-text {
+            font-size: 16px;
+            font-weight: 600;
+            color: #831843;
+        }
+
+        /* Capabilities */
+        .capabilities {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border-color);
+        }
+
+        .capabilities-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+        }
+
+        .capability-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 12px;
+        }
+
+        .capability-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 12px;
+            background: var(--bg-tertiary);
+            border-radius: 10px;
+        }
+
+        .capability-icon {
+            font-size: 20px;
+            margin-top: 2px;
+        }
+
+        .capability-text {
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+
+        /* Before/After Comparison */
+        .comparison-section {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border-color);
+        }
+
+        .comparison-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .compare-panel {
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .compare-panel h3 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+
+        .compare-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .arrow {
+            text-align: center;
+            font-size: 24px;
+            color: var(--accent-color);
+            margin: 20px 0;
+        }
+
+        .demo-device {
+            width: 100%;
+            background: #fff;
+            border-radius: 12px;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        /* Usage Examples */
+        .usage-section {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border-color);
+        }
+
+        .usage-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+        }
+
+        .usage-card {
+            background: linear-gradient(135deg, var(--accent-color), #a855f7);
+            border-radius: 16px;
+            padding: 20px;
+            color: #fff;
+        }
+
+        .usage-card h4 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            opacity: 0.9;
+        }
+
+        .usage-speech {
+            font-size: 16px;
+            font-weight: 500;
+            margin: 12px 0;
+            line-height: 1.5;
+        }
+
+        .usage-example {
+            font-size: 14px;
+            opacity: 0.8;
+            line-height: 1.6;
+        }
+
+        /* Notes */
+        .notes-section {
+            background: #fff8e1;
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid #fff59d;
+        }
+
+        .notes-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: #856404;
+        }
+
+        .notes-list {
+            list-style: none;
+        }
+
+        .notes-list li {
+            padding: 8px 0;
+            padding-left: 24px;
+            position: relative;
+            color: var(--text-primary);
+        }
+
+        .notes-list li::before {
+            content: '⚠️';
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+
+        /* Version History */
+        .history-section {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border-color);
+        }
+
+        .history-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+        }
+
+        .version-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .version-item {
+            display: flex;
+            gap: 16px;
+            padding: 16px 20px;
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            transition: all 0.3s;
+        }
+
+        .version-item:hover {
+            background: var(--border-color);
+        }
+
+        .version-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--accent-color);
+            min-width: 64px;
+        }
+
+        .version-content {
+            flex: 1;
+        }
+
+        .version-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .version-meta {
+            font-size: 12px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .version-diff {
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+        }
+
+        .version-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .version-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            border: none;
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .version-btn:hover {
+            background: var(--accent-color);
+            color: #fff;
+        }
+
+        /* Decision Section */
+        .decision-section {
+            text-align: center;
+            padding: 40px;
+            background: linear-gradient(135deg, #e0f2fe, var(--bg-secondary));
+            border-radius: 24px;
+            border: 1px solid var(--border-color);
+        }
+
+        .decision-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            color: var(--text-primary);
+        }
+
+        .decision-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        .decision-btn {
+            padding: 14px 40px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+
+        .btn-approve {
+            background: var(--success-color);
+            color: #fff;
+        }
+
+        .btn-approve:hover {
+            background: #2eb84e;
+            transform: translateY(-2px);
+        }
+
+        .btn-reject {
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+        }
+
+        .btn-reject:hover {
+            background: var(--border-color);
+            color: var(--text-primary);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                text-align: center;
+                gap: 20px;
+            }
+
+            .banner {
+                text-align: center;
+            }
+
+            .banner-features {
+                justify-content: center;
+            }
+
+            .compare-icon {
+                font-size: 32px;
+            }
+
+            .skill-title {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <div class="logo-circle">🤖</div>
+                <div class="header-title">
+                    <h1>我的助手</h1>
+                    <p class="header-subtitle">AI 技能成长空间</p>
+                </div>
+            </div>
+            <button class="theme-toggle" onclick="toggleTheme()">
+                <span class="theme-icon">🌙</span>
+                <span class="theme-text">切换主题</span>
+            </button>
+        </header>
+
+        <!-- Banner -->
+        <div class="banner">
+            <div class="banner-title">🎉 你的助手今天学会了 3 个新本领！</div>
+            <div class="banner-count">3 新本领</div>
+            <div class="banner-features">
+                <div class="feature-item">📊 数据整理</div>
+                <div class="feature-item">📅 时间管理</div>
+                <div class="feature-item">📝 文档写作</div>
+                <div class="feature-item">👥 协作沟通</div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <div class="section-title">✨ 问你助手</div>
+                <div class="search-box">
+                    <span>🔍</span>
+                    <input type="text" placeholder="搜索本领...">
+                </div>
+
+                <div class="skill-list" id="skillList">
+                    <!-- Skills will be rendered here -->
+                </div>
+            </aside>
+
+            <!-- Main Panel -->
+            <main class="main-panel">
+                <!-- Skill Detail -->
+                <div class="skill-detail" id="skillDetail">
+                    <div class="skill-header">
+                        <div class="skill-title-section">
+                            <div class="skill-breadcrumb">
+                                首页 > 技能中心
+                            </div>
+                            <h1 class="skill-title" id="skillTitle">飞书表格自动整理</h1>
+                            <div class="skill-meta" style="margin-top: 12px;">
+                                <span class="skill-status status-pending">待确认学习</span>
+                                <span>版本 v2.3.0</span>
+                                <span>上次更新：2026-03-22</span>
+                            </div>
+                        </div>
+                        <div class="skill-actions">
+                            <button class="action-btn btn-secondary" onclick="showHistory()">
+                                📜 历史版本
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- One-Liner -->
+                    <div class="one-liner">
+                        <div class="one-liner-icon">💡</div>
+                        <div class="one-liner-text">帮你把乱糟糟的飞书表格自动分类，按部门、日期、项目整理好</div>
+                    </div>
+
+                    <!-- Capabilities -->
+                    <div class="capabilities">
+                        <div class="capabilities-title">📌 能帮你做什么</div>
+                        <div class="capability-list">
+                            <div class="capability-item">
+                                <span class="capability-icon">✅</span>
+                                <span class="capability-text">自动识别表格里的部门信息</span>
+                            </div>
+                            <div class="capability-item">
+                                <span class="capability-icon">✅</span>
+                                <span class="capability-text">按项目把数据分到不同工作表</span>
+                            </div>
+                            <div class="capability-item">
+                                <span class="capability-icon">✅</span>
+                                <span class="capability-text">给整理好的表格加标签和颜色</span>
+                            </div>
+                            <div class="capability-item">
+                                <span class="capability-icon">✅</span>
+                                <span class="capability-text">支持自定义整理规则</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Comparison -->
+                    <div class="comparison-section">
+                        <div class="comparison-title">📊 效果对比</div>
+                        <div class="comparison-grid">
+                            <div class="compare-panel">
+                                <div class="compare-icon">📦</div>
+                                <h3>整理前</h3>
+                                <div class="demo-device">
+                                    <div style="background: #f5f5f5; padding: 12px; border-radius: 8px; margin-bottom: 8px;">
+                                        <div style="color: var(--text-secondary); font-size: 12px;">表格：项目数据</div>
+                                        <div style="color: var(--text-primary); margin-top: 8px;">
+                                            <div style="font-size: 14px;">项目 A - 张三 - 2026-03-01</div>
+                                            <div style="font-size: 14px;">项目 B - 李四 - 2026-03-02</div>
+                                            <div style="font-size: 14px;">项目 A - 王五 - 2026-03-03</div>
+                                            <div style="font-size: 14px;">项目 C - 赵六 - 2026-03-04</div>
+                                        </div>
+                                    </div>
+                                    <div style="color: var(--text-secondary); font-size: 12px; text-align: center;">需要手动整理</div>
+                                </div>
+                            </div>
+                            <div class="arrow">→</div>
+                            <div class="compare-panel">
+                                <div class="compare-icon">🎓</div>
+                                <h3>整理后</h3>
+                                <div class="demo-device">
+                                    <div style="background: #fff; padding: 12px; border-radius: 8px; margin-bottom: 8px;">
+                                        <div style="color: var(--text-secondary); font-size: 12px;">工作表：项目 A</div>
+                                        <div style="color: #2b8a3e; margin-top: 8px; font-size: 14px;">✓ 张三 - 2026-03-01</div>
+                                        <div style="color: #2b8a3e; font-size: 14px;">✓ 王五 - 2026-03-03</div>
+                                    </div>
+                                    <div style="color: var(--text-secondary); font-size: 12px; text-align: center;">自动分类完成</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Usage Examples -->
+                    <div class="usage-section">
+                        <div class="usage-title">🗣️ 你可以这样说：</div>
+                        <div class="usage-card">
+                            <h4>场景 1：快速整理</h4>
+                            <div class="usage-speech">"帮我把这个表格按部门整理一下"</div>
+                            <div class="usage-example">
+                                → 助手自动识别部门，创建新工作表，把数据分类过去<br>
+                                → 每个工作表加标签和颜色区分<br>
+                                → 5 分钟完成原本要 30 分钟的工作
+                            </div>
+                        </div>
+                        <div style="margin-top: 16px;" class="usage-card">
+                            <h4>场景 2：指定项目</h4>
+                            <div class="usage-speech">"把 Q1 的数据分到不同工作表"</div>
+                            <div class="usage-example">
+                                → 助手自动识别 Q1 时间范围<br>
+                                → 按项目分类到对应工作表<br>
+                                → 自动标注日期和负责人
+                            </div>
+                        </div>
+                        <div style="margin-top: 16px;" class="usage-card">
+                            <h4>场景 3：自定义规则</h4>
+                            <div class="usage-speech">"按项目分类，然后按负责人排序"</div>
+                            <div class="usage-example">
+                                → 按项目创建工作表<br>
+                                → 每个工作表按负责人排序<br>
+                                → 给负责人加高亮标记
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notes -->
+                    <div class="notes-section">
+                        <div class="notes-title">⚠️ 注意事项</div>
+                        <ul class="notes-list">
+                            <li style="margin-top: 8px;">第一次使用需要授权飞书表格权限</li>
+                            <li>只处理你有权限查看和编辑的表格</li>
+                            <li>原表格不会被覆盖，会创建新工作表</li>
+                            <li>支持 Microsoft Excel 和 Google Sheets 导入</li>
+                        </ul>
+                    </div>
+
+                    <!-- Version History -->
+                    <div class="history-section">
+                        <div class="history-title">📜 版本历史</div>
+                        <div class="version-list">
+                            <!-- v2.3.0 -->
+                            <div class="version-item" onclick="diffClick('2.3.0')">
+                                <div class="version-number">2.3</div>
+                                <div class="version-content">
+                                    <div class="version-title">性能优化与批量操作增强</div>
+                                    <div class="version-meta">
+                                        <span>2026-03-22 15:30</span>
+                                        <span>·</span>
+                                        <span>Caddy 更新</span>
+                                        <span class="version-diff">+45 -12 行</span>
+                                    </div>
+                                </div>
+                                <div class="version-actions">
+                                    <button class="version-btn" onclick="event.stopPropagation(); viewDiff('2.3.0')" title="查看变更">👁</button>
+                                    <button class="version-btn" onclick="event.stopPropagation(); revertVersion('2.3.0')" title="回滚">↩</button>
+                                </div>
+                            </div>
+                            <!-- v2.1.0 -->
+                            <div class="version-item" onclick="diffClick('2.2.0')">
+                                <div class="version-number">2.2</div>
+                                <div class="version-content">
+                                    <div class="version-title">新增视图管理功能</div>
+                                    <div class="version-meta">
+                                        <span>2026-03-18 14:20</span>
+                                        <span>·</span>
+                                        <span>Caddy 更新</span>
+                                        <span class="version-diff">+67 -15 行</span>
+                                    </div>
+                                </div>
+                                <div class="version-actions">
+                                    <button class="version-btn" onclick="event.stopPropagation(); viewDiff('2.2.0')" title="查看变更">👁</button>
+                                    <button class="version-btn" onclick="event.stopPropagation(); revertVersion('2.2.0')" title="回滚">↩</button>
+                                </div>
+                            </div>
+                            <!-- v2.0.0 -->
+                            <div class="version-item" onclick="diffClick('2.1.0')">
+                                <div class="version-number">2.1</div>
+                                <div class="version-content">
+                                    <div class="version-title">支持高级筛选和批量处理</div>
+                                    <div class="version-meta">
+                                        <span>2026-03-15 09:00</span>
+                                        <span>·</span>
+                                        <span>Caddy 更新</span>
+                                        <span class="version-diff">+120 -30 行</span>
+                                    </div>
+                                </div>
+                                <div class="version-actions">
+                                    <button class="version-btn" onclick="event.stopPropagation(); viewDiff('2.1.0')" title="查看变更">👁</button>
+                                    <button class="version-btn" onclick="event.stopPropagation(); revertVersion('2.1.0')" title="回滚">↩</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Decision Section -->
+                    <div class="decision-section">
+                        <div class="decision-title">🤔 要不要学习这个本领？</div>
+                        <div class="decision-buttons">
+                            <button class="decision-btn btn-approve" onclick="approveSkill()">
+                                <span>✅</span>
+                                <span>确认学习（30 秒上手）</span>
+                            </button>
+                            <button class="decision-btn btn-reject" onclick="rejectSkill()">
+                                <span>🚫</span>
+                                <span>暂时不需要</span>
+                            </button>
+                        </div>
+                        <div style="margin-top: 16px; font-size: 12px; color: var(--text-secondary);">
+                            点击"确认学习"后，这个本领会立即生效，下次可以直接使用
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Empty State (hidden by default) -->
+                <div class="empty-state" id="emptyState" style="display: none;">
+                    <div class="empty-icon">🔍</div>
+                    <h2>暂无相关技能</h2>
+                    <p>试试搜索其他关键词</p>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Skills Data
+        const skills = [
+            {
+                id: 1,
+                name: '飞书表格自动整理',
+                category: '数据处理',
+                description: '帮你把乱糟糟的飞书表格自动分类，按部门、日期、项目整理好',
+                status: 'pending',
+                version: '2.3.0',
+                lastModified: '2026-03-22',
+                capabilities: [
+                    '自动识别表格里的部门信息',
+                    '按项目把数据分到不同工作表',
+                    '给整理好的表格加标签和颜色',
+                    '支持自定义整理规则'
+                ],
+                history: [
+                    { version: '2.3.0', date: '2026-03-22', author: 'Caddy', diff: '+45 -12 行', title: '性能优化与批量操作增强' },
+                    { version: '2.2.0', date: '2026-03-18', author: 'Caddy', diff: '+67 -15 行', title: '新增视图管理功能' },
+                    { version: '2.1.0', date: '2026-03-15', author: 'Caddy', diff: '+120 -30 行', title: '支持高级筛选和批量处理' }
+                ]
+            },
+            {
+                id: 2,
+                name: '会议室预订助手',
+                category: '时间管理',
+                description: '帮你快速找空闲会议室，自动匹配合适的场地和时间',
+                status: 'approved',
+                version: '1.5.0',
+                lastModified: '2026-03-20',
+                capabilities: [
+                    '自动查看所有会议室的空闲时间',
+                    '根据人数推荐合适的会议室',
+                    '自动发送日历邀请给参会人',
+                    '支持视频会议链接自动生成'
+                ],
+                history: [
+                    { version: '1.5.0', date: '2026-03-20', author: 'Caddy', diff: '+28 -8 行', title: '支持视频会议集成' },
+                    { version: '1.4.0', date: '2026-03-15', author: 'Caddy', diff: '+56 -12 行', title: '新增会议室图标和描述' }
+                ]
+            },
+            {
+                id: 3,
+                name: '周报自动生成',
+                category: '文档写作',
+                description: '根据你的日程和表格数据，自动生成高质量的周报',
+                status: 'pending',
+                version: '3.2.0',
+                lastModified: '2026-03-21',
+                capabilities: [
+                    '自动提取日程中的重点任务',
+                    '汇总飞书表格的完成情况',
+                    '按固定模板生成周报草稿',
+                    '支持自定义风格和重点'
+                ],
+                history: [
+                    { version: '3.2.0', date: '2026-03-21', author: 'Caddy', diff: '+89 -24 行', title: '智能摘要优化' },
+                    { version: '3.1.0', date: '2026-03-18', author: 'Caddy', diff: '+45 -10 行', title: '新增周报模板库' }
+                ]
+            }
+        ];
+
+        // Render skills
+        function renderSkills() {
+            const skillList = document.getElementById('skillList');
+            skillList.innerHTML = skills.map(skill => `
+                <div class="skill-item ${skill.id === 1 ? 'active' : ''}" onclick="selectSkill(${skill.id})">
+                    <div class="skill-icon">${skill.id === 1 ? '📊' : skill.id === 2 ? '📅' : '📝'}</div>
+                    <div class="skill-info">
+                        <div class="skill-name">${skill.name}</div>
+                        <div class="skill-meta">
+                            <span class="skill-category">${skill.category}</span>
+                            <span class="skill-status status-${skill.status}">
+                                ${skill.status === 'pending' ? '待确认学习' : '已上线'}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Select skill
+        function selectSkill(id) {
+            const skill = skills.find(s => s.id === id);
+            if (!skill) return;
+
+            // Update active state
+            document.querySelectorAll('.skill-item').forEach(item => item.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+
+            // Update skill detail
+            document.getElementById('skillTitle').textContent = skill.name;
+            document.querySelector('.status-pending')?.classList.remove('status-pending');
+            document.querySelector('.status-approved')?.classList.remove('status-approved');
+            const statusEl = document.createElement('span');
+            statusEl.className = `skill-status status-${skill.status}`;
+            statusEl.textContent = skill.status === 'pending' ? '待确认学习' : '已上线';
+            document.querySelector('.skill-meta').appendChild(statusEl);
+        }
+
+        // Approve skill
+        function approveSkill() {
+            alert('✅ 确认学习！本领会立即生效。\n\n效果预览：\n• 输入"整理表格按部门"\n• 助手自动识别并分类\n• 创建新工作表并标注');
+        }
+
+        // Reject skill
+        function rejectSkill() {
+            alert('🚫 暂时不需要\n\n你可以稍后在菜单中重新查看这个本领');
+        }
+
+        // Show history
+        function showHistory() {
+            alert('📜 版本历史\n\n点击左侧版本项可查看详情');
+        }
+
+        // Diff click
+        function diffClick(version) {
+            alert(`查看版本 ${version} 的详细变更`);
+        }
+
+        // View diff
+        function viewDiff(version) {
+            alert(`查看版本 ${version} 的详细变更（原型演示）`);
+        }
+
+        // Revert version
+        function revertVersion(version) {
+            if (confirm(`确定要回滚到版本 ${version} 吗？`)) {
+                alert(`已回滚到版本 ${version}（原型演示）`);
+            }
+        }
+
+        // Toggle theme
+        function toggleTheme() {
+            const body = document.body;
+            const isDark = body.style.backgroundColor === '#0d0d0d';
+            
+            if (isDark) {
+                body.style.backgroundColor = '#f8f9fa';
+                document.documentElement.style.setProperty('--bg-primary', '#f8f9fa');
+                document.documentElement.style.setProperty('--bg-secondary', '#ffffff');
+                document.documentElement.style.setProperty('--bg-tertiary', '#f1f3f5');
+                document.documentElement.style.setProperty('--text-primary', '#212529');
+                document.documentElement.style.setProperty('--text-secondary', '#6c757d');
+                document.documentElement.style.setProperty('--border-color', '#dee2e6');
+                document.querySelector('.theme-icon').textContent = '☀️';
+            } else {
+                body.style.backgroundColor = '#0d0d0d';
+                document.documentElement.style.setProperty('--bg-primary', '#0d0d0d');
+                document.documentElement.style.setProperty('--bg-secondary', '#1a1a1a');
+                document.documentElement.style.setProperty('--bg-tertiary', '#262626');
+                document.documentElement.style.setProperty('--text-primary', '#f5f5f5');
+                document.documentElement.style.setProperty('--text-secondary', '#a0a0a0');
+                document.documentElement.style.setProperty('--border-color', '#333');
+                document.querySelector('.theme-icon').textContent = '🌙';
+            }
+        }
+
+        // Initialize
+        renderSkills();
+    </script>
+</body>
+</html>

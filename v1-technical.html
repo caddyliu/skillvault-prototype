@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillVault - Skill 版本管理</title>
+    <style>
+        :root {
+            --bg-primary: #0d0d0d;
+            --bg-secondary: #1a1a1a;
+            --bg-tertiary: #262626;
+            --text-primary: #f5f5f5;
+            --text-secondary: #a0a0a0;
+            --text-muted: #666;
+            --border-color: #333;
+            --accent-color: #5c7cfa;
+            --accent-hover: #4c6ef5;
+            --success-color: #40c057;
+            --warning-color: #fcc419;
+            --danger-color: #fa5252;
+            --diff-add: #1a472a;
+            --diff-remove: #4a1a1a;
+            --diff-add-text: #8ce99a;
+            --diff-remove-text: #ff8787;
+        }
+
+        [data-theme="light"] {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --bg-tertiary: #e9ecef;
+            --text-primary: #212529;
+            --text-secondary: #6c757d;
+            --text-muted: #adb5bd;
+            --border-color: #dee2e6;
+            --diff-add: #d3f9d8;
+            --diff-remove: #ffe3e3;
+            --diff-add-text: #2b8a3e;
+            --diff-remove-text: #c92a2a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .app-container {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo-icon {
+            width: 28px;
+            height: 28px;
+            background: var(--accent-color);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .theme-toggle {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .theme-toggle:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .skill-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+        }
+
+        .skill-item {
+            padding: 12px 16px;
+            margin-bottom: 4px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .skill-item:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .skill-item.active {
+            background: var(--bg-tertiary);
+            border-color: var(--accent-color);
+        }
+
+        .skill-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+
+        .skill-name {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .skill-status {
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-weight: 500;
+        }
+
+        .status-pending {
+            background: var(--warning-color);
+            color: #000;
+        }
+
+        .status-approved {
+            background: var(--success-color);
+            color: #fff;
+        }
+
+        .status-none {
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+        }
+
+        .skill-meta {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        /* Main Content */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .content-header {
+            padding: 20px 32px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .content-title {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .content-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--accent-color);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border-color);
+        }
+
+        .btn-success {
+            background: var(--success-color);
+            color: #fff;
+        }
+
+        .btn-success:hover {
+            background: #37b24d;
+        }
+
+        /* Content Body */
+        .content-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 32px;
+        }
+
+        .panel {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border-color);
+        }
+
+        .panel-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .skill-description {
+            color: var(--text-secondary);
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+
+        .skill-tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        /* Diff View */
+        .diff-container {
+            background: var(--bg-primary);
+            border-radius: 8px;
+            overflow: hidden;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+            font-size: 13px;
+        }
+
+        .diff-header {
+            padding: 12px 16px;
+            background: var(--bg-tertiary);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .diff-stats {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .diff-stats span {
+            margin-right: 16px;
+        }
+
+        .diff-add-count {
+            color: var(--diff-add-text);
+        }
+
+        .diff-remove-count {
+            color: var(--diff-remove-text);
+        }
+
+        .diff-content {
+            padding: 0;
+            overflow-x: auto;
+        }
+
+        .diff-line {
+            padding: 4px 16px;
+            line-height: 1.6;
+        }
+
+        .diff-line-add {
+            background: var(--diff-add);
+            color: var(--diff-add-text);
+        }
+
+        .diff-line-remove {
+            background: var(--diff-remove);
+            color: var(--diff-remove-text);
+        }
+
+        .diff-line-context {
+            color: var(--text-secondary);
+        }
+
+        .diff-line-number {
+            display: inline-block;
+            width: 40px;
+            color: var(--text-muted);
+            user-select: none;
+        }
+
+        /* Version History */
+        .version-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .version-item {
+            display: flex;
+            gap: 16px;
+            padding: 16px;
+            background: var(--bg-primary);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .version-item:hover {
+            border-color: var(--accent-color);
+        }
+
+        .version-item.active {
+            border-color: var(--accent-color);
+            background: var(--bg-tertiary);
+        }
+
+        .version-number {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--accent-color);
+            min-width: 60px;
+        }
+
+        .version-info {
+            flex: 1;
+        }
+
+        .version-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .version-meta {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .version-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .btn-icon:hover {
+            background: var(--border-color);
+            color: var(--text-primary);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            width: 100%;
+            max-width: 500px;
+            padding: 32px;
+            border: 1px solid var(--border-color);
+            transform: scale(0.9);
+            transition: transform 0.3s;
+        }
+
+        .modal-overlay.active .modal {
+            transform: scale(1);
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .modal-description {
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        .modal-changes {
+            background: var(--bg-primary);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 24px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .modal-change-item {
+            font-size: 13px;
+            padding: 4px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .modal-change-icon {
+            font-size: 12px;
+            margin-top: 2px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .btn-danger {
+            background: var(--danger-color);
+            color: #fff;
+        }
+
+        .btn-danger:hover {
+            background: #e03131;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-state-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
+        /* Tab Navigation */
+        .tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 12px;
+        }
+
+        .tab {
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+        }
+
+        .tab:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .tab.active {
+            background: var(--accent-color);
+            color: #fff;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .app-container {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                display: none;
+            }
+
+            .content-body {
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <div class="logo-icon">📦</div>
+                    SkillVault
+                </div>
+                <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+            </div>
+            <div class="skill-list" id="skillList">
+                <!-- Skill items will be rendered here -->
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="content-header">
+                <h1 class="content-title" id="contentTitle">选择 Skill</h1>
+                <div class="content-actions">
+                    <button class="btn btn-secondary" onclick="showHistory()">
+                        📜 版本历史
+                    </button>
+                    <button class="btn btn-primary" onclick="showApproveModal()">
+                        ✓ 审批变更
+                    </button>
+                </div>
+            </div>
+
+            <div class="content-body">
+                <div class="tabs">
+                    <div class="tab active" onclick="switchTab('overview')">概览</div>
+                    <div class="tab" onclick="switchTab('diff')">变更对比</div>
+                    <div class="tab" onclick="switchTab('history')">版本历史</div>
+                </div>
+
+                <div id="overviewPanel">
+                    <div class="panel">
+                        <h2 class="panel-title">📝 描述</h2>
+                        <p class="skill-description" id="skillDescription">
+                            从左侧选择一个 Skill 查看详情
+                        </p>
+                        <div class="skill-tags" id="skillTags">
+                            <!-- Tags will be rendered here -->
+                        </div>
+                    </div>
+
+                    <div class="panel">
+                        <h2 class="panel-title">📊 变更统计</h2>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+                            <div>
+                                <div style="font-size: 24px; font-weight: 700; color: var(--diff-add-text);" id="addCount">0</div>
+                                <div style="font-size: 12px; color: var(--text-secondary);">新增行数</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 24px; font-weight: 700; color: var(--diff-remove-text);" id="removeCount">0</div>
+                                <div style="font-size: 12px; color: var(--text-secondary);">删除行数</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 24px; font-weight: 700; color: var(--accent-color);" id="fileCount">0</div>
+                                <div style="font-size: 12px; color: var(--text-secondary);">修改文件</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="diffPanel" style="display: none;">
+                    <div class="panel">
+                        <div class="diff-container">
+                            <div class="diff-header">
+                                <span style="font-weight: 600;">SKILL.md 变更对比</span>
+                                <div class="diff-stats">
+                                    <span class="diff-add-count">+<span id="diffAddCount">0</span></span>
+                                    <span class="diff-remove-count">-<span id="diffRemoveCount">0</span></span>
+                                </div>
+                            </div>
+                            <div class="diff-content" id="diffContent">
+                                <!-- Diff lines will be rendered here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="historyPanel" style="display: none;">
+                    <div class="panel">
+                        <h2 class="panel-title">📜 版本历史</h2>
+                        <div class="version-list" id="versionList">
+                            <!-- Version items will be rendered here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Approve Modal -->
+    <div class="modal-overlay" id="approveModal">
+        <div class="modal">
+            <h2 class="modal-title">确认审批变更</h2>
+            <p class="modal-description">
+                请仔细审查以下变更，确认无误后批准发布。此操作将把变更合并到主分支。
+            </p>
+            <div class="modal-changes" id="modalChanges">
+                <!-- Change items will be rendered here -->
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="hideApproveModal()">取消</button>
+                <button class="btn btn-success" onclick="approveChanges()">
+                    ✓ 批准发布
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mock Data
+        const skills = [
+            {
+                id: 1,
+                name: 'feishu-bitable',
+                description: '飞书多维表格（Bitable）的创建、查询、编辑和管理工具。包含 27 种字段类型支持、高级筛选、批量操作和视图管理。支持创建应用、管理数据表、字段配置、记录 CRUD 操作以及视图切换。',
+                tags: ['飞书', '多维表格', '数据管理'],
+                status: 'pending',
+                version: '2.3.0',
+                lastModified: '2026-03-22 15:30',
+                author: 'Caddy',
+                addLines: 45,
+                removeLines: 12,
+                files: 3,
+                diff: [
+                    { line: 1, type: 'context', content: '# feishu-bitable Skill' },
+                    { line: 2, type: 'context', content: '' },
+                    { line: 3, type: 'remove', content: '- 支持基础 CRUD 操作' },
+                    { line: 4, type: 'add', content: '+ 支持 27 种字段类型（文本、数字、单选、多选、人员、附件等）' },
+                    { line: 5, type: 'add', content: '+ 新增高级筛选功能，支持多条件组合查询' },
+                    { line: 6, type: 'add', content: '+ 批量操作优化，单次最多处理 500 条记录' },
+                    { line: 7, type: 'context', content: '' },
+                    { line: 8, type: 'context', content: '## 功能列表' },
+                    { line: 9, type: 'context', content: '' },
+                    { line: 10, type: 'remove', content: '- create_app: 创建多维表格应用' },
+                    { line: 11, type: 'add', content: '+ create_app: 创建多维表格应用（支持高级权限配置）' },
+                    { line: 12, type: 'add', content: '+ batch_create_records: 批量创建记录（性能提升 300%）' },
+                    { line: 13, type: 'add', content: '+ advanced_filter: 高级筛选器，支持 AND/OR 逻辑' },
+                    { line: 14, type: 'context', content: '' },
+                    { line: 15, type: 'context', content: '## 使用示例' },
+                ],
+                versions: [
+                    { version: '2.3.0', title: '性能优化与批量操作增强', date: '2026-03-22 15:30', author: 'Caddy', changes: '+45 -12' },
+                    { version: '2.2.1', title: '修复字段类型识别问题', date: '2026-03-20 10:15', author: 'Caddy', changes: '+8 -3' },
+                    { version: '2.2.0', title: '新增视图管理功能', date: '2026-03-18 14:20', author: 'Caddy', changes: '+67 -15' },
+                    { version: '2.1.0', title: '支持高级筛选', date: '2026-03-15 09:00', author: 'Caddy', changes: '+120 -30' },
+                ]
+            },
+            {
+                id: 2,
+                name: 'feishu-calendar',
+                description: '飞书日历与日程管理工具集。包含日历管理、日程管理、参会人管理、忙闲查询。支持创建会议、查询日程、管理参会人、查看忙闲状态等功能。',
+                tags: ['飞书', '日历', '日程管理'],
+                status: 'approved',
+                version: '1.8.0',
+                lastModified: '2026-03-21 11:00',
+                author: 'Caddy',
+                addLines: 0,
+                removeLines: 0,
+                files: 0,
+                diff: [],
+                versions: [
+                    { version: '1.8.0', title: '支持忙闲查询批量接口', date: '2026-03-21 11:00', author: 'Caddy', changes: '+32 -8' },
+                    { version: '1.7.5', title: '修复时区显示问题', date: '2026-03-19 16:45', author: 'Caddy', changes: '+5 -2' },
+                    { version: '1.7.0', title: '新增参会人管理', date: '2026-03-17 13:30', author: 'Caddy', changes: '+89 -20' },
+                ]
+            },
+            {
+                id: 3,
+                name: 'feishu-im-read',
+                description: '飞书 IM 消息读取工具使用指南，覆盖会话消息获取、话题回复读取、跨会话消息搜索、图片/文件资源下载。支持按时间范围过滤、分页获取、消息类型筛选等高级功能。',
+                tags: ['飞书', 'IM', '消息读取'],
+                status: 'pending',
+                version: '3.1.0',
+                lastModified: '2026-03-22 18:45',
+                author: 'Caddy',
+                addLines: 78,
+                removeLines: 25,
+                files: 5,
+                diff: [
+                    { line: 1, type: 'context', content: '# feishu-im-read Skill' },
+                    { line: 2, type: 'context', content: '' },
+                    { line: 3, type: 'context', content: '## 核心功能' },
+                    { line: 4, type: 'context', content: '' },
+                    { line: 5, type: 'add', content: '+ ### 消息搜索增强' },
+                    { line: 6, type: 'add', content: '+ - 支持按发送者过滤' },
+                    { line: 7, type: 'add', content: '+ - 支持按消息类型过滤（file/image/media）' },
+                    { line: 8, type: 'add', content: '+ - 支持跨会话搜索' },
+                    { line: 9, type: 'context', content: '' },
+                    { line: 10, type: 'context', content: '## API 列表' },
+                    { line: 11, type: 'context', content: '' },
+                    { line: 12, type: 'remove', content: '- get_messages: 获取会话消息' },
+                    { line: 13, type: 'add', content: '+ get_messages: 获取会话消息（支持时间范围过滤）' },
+                    { line: 14, type: 'add', content: '+ search_messages: 跨会话搜索（新增 5 个过滤条件）' },
+                    { line: 15, type: 'add', content: '+ get_thread_messages: 获取话题内回复消息' },
+                    { line: 16, type: 'add', content: '+ download_resource: 下载图片/文件资源' },
+                    { line: 17, type: 'context', content: '' },
+                    { line: 18, type: 'context', content: '## 使用场景' },
+                ],
+                versions: [
+                    { version: '3.1.0', title: '消息搜索功能增强', date: '2026-03-22 18:45', author: 'Caddy', changes: '+78 -25' },
+                    { version: '3.0.2', title: '修复话题消息读取问题', date: '2026-03-20 14:00', author: 'Caddy', changes: '+12 -5' },
+                    { version: '3.0.0', title: '重大更新：支持资源下载', date: '2026-03-18 10:30', author: 'Caddy', changes: '+156 -40' },
+                ]
+            },
+            {
+                id: 4,
+                name: 'feishu-task',
+                description: '飞书任务管理工具，用于创建、查询、更新任务和清单。支持设置负责人、关注人、截止时间、重复规则等。',
+                tags: ['飞书', '任务管理'],
+                status: 'approved',
+                version: '2.0.0',
+                lastModified: '2026-03-19 09:30',
+                author: 'Caddy',
+                addLines: 0,
+                removeLines: 0,
+                files: 0,
+                diff: [],
+                versions: [
+                    { version: '2.0.0', title: '重构任务模型', date: '2026-03-19 09:30', author: 'Caddy', changes: '+200 -80' },
+                    { version: '1.9.0', title: '新增子任务功能', date: '2026-03-16 15:00', author: 'Caddy', changes: '+95 -20' },
+                ]
+            },
+            {
+                id: 5,
+                name: 'feishu-create-doc',
+                description: '创建飞书云文档。从 Lark-flavored Markdown 内容创建新的飞书云文档，支持指定创建位置（文件夹/知识库/知识空间）。支持异步任务查询。',
+                tags: ['飞书', '云文档', 'Markdown'],
+                status: 'pending',
+                version: '1.5.0',
+                lastModified: '2026-03-22 20:15',
+                author: 'Caddy',
+                addLines: 34,
+                removeLines: 8,
+                files: 2,
+                diff: [
+                    { line: 1, type: 'context', content: '# feishu-create-doc Skill' },
+                    { line: 2, type: 'context', content: '' },
+                    { line: 3, type: 'add', content: '## 新增功能' },
+                    { line: 4, type: 'add', content: '' },
+                    { line: 5, type: 'add', content: '- 支持异步创建模式（task_id 查询）' },
+                    { line: 6, type: 'add', content: '- 支持创建到知识库节点' },
+                    { line: 7, type: 'add', content: '- 支持创建到知识空间' },
+                    { line: 8, type: 'context', content: '' },
+                    { line: 9, type: 'context', content: '## 参数说明' },
+                    { line: 10, type: 'context', content: '' },
+                    { line: 11, type: 'remove', content: '- markdown: Markdown 内容（必填）' },
+                    { line: 12, type: 'add', content: '- markdown: Markdown 内容（必填，支持 Lark 语法）' },
+                    { line: 13, type: 'add', content: '- title: 文档标题（可选）' },
+                    { line: 14, type: 'add', content: '- folder_token: 父文件夹 token（可选）' },
+                    { line: 15, type: 'add', content: '- wiki_node: 知识库节点 token（可选）' },
+                    { line: 16, type: 'add', content: '- wiki_space: 知识空间 ID（可选）' },
+                ],
+                versions: [
+                    { version: '1.5.0', title: '支持异步创建和知识库', date: '2026-03-22 20:15', author: 'Caddy', changes: '+34 -8' },
+                    { version: '1.4.2', title: '优化 Markdown 解析', date: '2026-03-20 11:20', author: 'Caddy', changes: '+18 -6' },
+                ]
+            }
+        ];
+
+        let currentSkill = null;
+        let currentTab = 'overview';
+
+        // Initialize
+        function init() {
+            renderSkillList();
+        }
+
+        // Render Skill List
+        function renderSkillList() {
+            const skillList = document.getElementById('skillList');
+            skillList.innerHTML = skills.map(skill => `
+                <div class="skill-item ${currentSkill?.id === skill.id ? 'active' : ''}" 
+                     onclick="selectSkill(${skill.id})">
+                    <div class="skill-item-header">
+                        <span class="skill-name">${skill.name}</span>
+                        <span class="skill-status status-${skill.status}">
+                            ${skill.status === 'pending' ? '待审批' : skill.status === 'approved' ? '已批准' : '无变更'}
+                        </span>
+                    </div>
+                    <div class="skill-meta">
+                        v${skill.version} · ${skill.lastModified}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Select Skill
+        function selectSkill(id) {
+            currentSkill = skills.find(s => s.id === id);
+            renderSkillList();
+            renderOverview();
+            renderDiff();
+            renderHistory();
+            updateStats();
+        }
+
+        // Render Overview
+        function renderOverview() {
+            if (!currentSkill) return;
+            
+            document.getElementById('contentTitle').textContent = currentSkill.name;
+            document.getElementById('skillDescription').textContent = currentSkill.description;
+            document.getElementById('skillTags').innerHTML = currentSkill.tags.map(tag => 
+                `<span class="tag">${tag}</span>`
+            ).join('');
+        }
+
+        // Render Diff
+        function renderDiff() {
+            const diffContent = document.getElementById('diffContent');
+            if (!currentSkill || !currentSkill.diff || currentSkill.diff.length === 0) {
+                diffContent.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📄</div>
+                        <div class="empty-state-title">暂无变更</div>
+                        <div>该 Skill 当前没有待审批的变更</div>
+                    </div>
+                `;
+                return;
+            }
+
+            diffContent.innerHTML = currentSkill.diff.map(line => `
+                <div class="diff-line diff-line-${line.type}">
+                    <span class="diff-line-number">${line.line}</span>
+                    <span>${line.type === 'add' ? '+' : line.type === 'remove' ? '-' : ' '}${line.content}</span>
+                </div>
+            `).join('');
+        }
+
+        // Render History
+        function renderHistory() {
+            const versionList = document.getElementById('versionList');
+            if (!currentSkill || !currentSkill.versions) {
+                versionList.innerHTML = '<div class="empty-state"><div class="empty-state-title">暂无版本历史</div></div>';
+                return;
+            }
+
+            versionList.innerHTML = currentSkill.versions.map((v, index) => `
+                <div class="version-item ${index === 0 ? 'active' : ''}">
+                    <div class="version-number">v${v.version}</div>
+                    <div class="version-info">
+                        <div class="version-title">${v.title}</div>
+                        <div class="version-meta">${v.date} · ${v.author} · ${v.changes}</div>
+                    </div>
+                    <div class="version-actions">
+                        <button class="btn-icon" onclick="viewVersionDiff('${v.version}')" title="查看变更">👁</button>
+                        <button class="btn-icon" onclick="revertVersion('${v.version}')" title="回滚">↩</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Update Stats
+        function updateStats() {
+            document.getElementById('addCount').textContent = currentSkill?.addLines || 0;
+            document.getElementById('removeCount').textContent = currentSkill?.removeLines || 0;
+            document.getElementById('fileCount').textContent = currentSkill?.files || 0;
+            document.getElementById('diffAddCount').textContent = currentSkill?.addLines || 0;
+            document.getElementById('diffRemoveCount').textContent = currentSkill?.removeLines || 0;
+        }
+
+        // Switch Tab
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+
+            document.getElementById('overviewPanel').style.display = tab === 'overview' ? 'block' : 'none';
+            document.getElementById('diffPanel').style.display = tab === 'diff' ? 'block' : 'none';
+            document.getElementById('historyPanel').style.display = tab === 'history' ? 'block' : 'none';
+        }
+
+        // Show History
+        function showHistory() {
+            switchTab('history');
+            document.querySelectorAll('.tab')[2].classList.add('active');
+            document.querySelectorAll('.tab')[0].classList.remove('active');
+        }
+
+        // Show Approve Modal
+        function showApproveModal() {
+            if (!currentSkill) {
+                alert('请先选择一个 Skill');
+                return;
+            }
+
+            if (currentSkill.status !== 'pending') {
+                alert('该 Skill 没有待审批的变更');
+                return;
+            }
+
+            const modalChanges = document.getElementById('modalChanges');
+            modalChanges.innerHTML = `
+                <div class="modal-change-item">
+                    <span class="modal-change-icon" style="color: var(--diff-add-text);">+</span>
+                    <span>新增 ${currentSkill.addLines} 行</span>
+                </div>
+                <div class="modal-change-item">
+                    <span class="modal-change-icon" style="color: var(--diff-remove-text);">-</span>
+                    <span>删除 ${currentSkill.removeLines} 行</span>
+                </div>
+                <div class="modal-change-item">
+                    <span class="modal-change-icon">📄</span>
+                    <span>修改 ${currentSkill.files} 个文件</span>
+                </div>
+                <div class="modal-change-item">
+                    <span class="modal-change-icon">👤</span>
+                    <span>作者：${currentSkill.author}</span>
+                </div>
+                <div class="modal-change-item">
+                    <span class="modal-change-icon">🏷</span>
+                    <span>版本：v${currentSkill.version}</span>
+                </div>
+            `;
+
+            document.getElementById('approveModal').classList.add('active');
+        }
+
+        // Hide Approve Modal
+        function hideApproveModal() {
+            document.getElementById('approveModal').classList.remove('active');
+        }
+
+        // Approve Changes
+        function approveChanges() {
+            if (currentSkill) {
+                currentSkill.status = 'approved';
+                renderSkillList();
+                hideApproveModal();
+                
+                // Show success message
+                alert(`✓ ${currentSkill.name} 变更已批准发布！`);
+            }
+        }
+
+        // View Version Diff
+        function viewVersionDiff(version) {
+            alert(`查看版本 ${version} 的详细变更（原型演示）`);
+        }
+
+        // Revert Version
+        function revertVersion(version) {
+            if (confirm(`确定要回滚到版本 ${version} 吗？此操作不可逆。`)) {
+                alert(`已回滚到版本 ${version}（原型演示）`);
+            }
+        }
+
+        // Toggle Theme
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            html.setAttribute('data-theme', newTheme);
+            
+            const btn = document.querySelector('.theme-toggle');
+            btn.textContent = newTheme === 'light' ? '☀️' : '🌙';
+        }
+
+        // Initialize on load
+        init();
+    </script>
+</body>
+</html>
